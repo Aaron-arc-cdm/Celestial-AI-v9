@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
         
         :root {
             --mood-color: #00f5ff;
@@ -37,6 +37,7 @@
         .chat-bubble-ai {
             background: rgba(17, 17, 34, 0.95);
             backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 245, 255, 0.2);
         }
         
         .nav-active {
@@ -56,6 +57,39 @@
         .quantum-ring {
             animation: quantum-pulse 2s ease-in-out infinite;
         }
+
+        .ai-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 9999px;
+            color: #3b82f6;
+        }
+
+        .ai-indicator.offline {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .ai-indicator.online {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
     </style>
 </head>
 <body class="celestial-bg text-white font-sans overflow-hidden h-screen flex flex-col">
@@ -73,8 +107,14 @@
             </div>
         </div>
         
+        <!-- AI Status Indicator -->
+        <div id="ai-status" class="ml-auto mr-4 ai-indicator online">
+            <div class="w-2 h-2 bg-current rounded-full pulse"></div>
+            <span id="ai-mode-text">GEMINI • ONLINE</span>
+        </div>
+
         <!-- Dynamic Mood Indicator -->
-        <div id="mood-indicator" class="ml-auto flex items-center gap-x-2 px-6 py-1.5 bg-white/5 rounded-3xl border border-white/10">
+        <div id="mood-indicator" class="flex items-center gap-x-2 px-6 py-1.5 bg-white/5 rounded-3xl border border-white/10">
             <div id="mood-dot" class="w-3 h-3 bg-cyan-400 rounded-full quantum-ring"></div>
             <span id="mood-text" class="text-sm font-medium uppercase tracking-widest">CALM PROTOCOL</span>
         </div>
@@ -90,7 +130,7 @@
                 <i class="fa-solid fa-location-dot text-emerald-400"></i>
                 <span class="text-emerald-400 font-medium">Kampala, Uganda</span>
             </div>
-            <div onclick="toggleVoice()" id="voice-status" class="flex items-center gap-x-2 cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-4 py-1 rounded-2xl text-xs font-semibold">
+            <div onclick="toggleVoice()" id="voice-status" class="flex items-center gap-x-2 cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-4 py-1 rounded-2xl text-xs font-medium">
                 <i class="fa-solid fa-microphone"></i>
                 <span>VOICE READY</span>
             </div>
@@ -160,7 +200,7 @@
                         <div id="core-bar" class="h-full w-[100%] bg-gradient-to-r from-cyan-400 to-purple-400 rounded-3xl"></div>
                     </div>
                     <div class="text-xs text-white/60 mt-4 flex items-center gap-x-2">
-                        <span class="flex-1">Memory: <span id="memory-count" class="font-mono text-cyan-400">47</span> fragments</span>
+                        <span class="flex-1">Memory: <span id="memory-count" class="font-mono text-cyan-400">0</span> fragments</span>
                         <span class="flex-1 text-right">Mood stability: <span id="mood-stability" class="font-mono text-cyan-400">98.4%</span></span>
                     </div>
                 </div>
@@ -191,11 +231,11 @@
                             <div class="flex justify-between">
                                 <div>
                                     <div class="uppercase text-xs tracking-widest text-white/50">NEURAL MEMORY</div>
-                                    <div id="hud-memory" class="text-6xl font-semibold mt-2 font-mono">47</div>
+                                    <div id="hud-memory" class="text-6xl font-semibold mt-2 font-mono">0</div>
                                 </div>
                                 <i class="fa-solid fa-brain text-5xl text-cyan-400 group-hover:scale-110"></i>
                             </div>
-                            <div class="text-sm text-white/60 mt-8">Last fragment: <span id="last-memory" class="font-medium text-cyan-300">"What is the nature of time?"</span></div>
+                            <div class="text-sm text-white/60 mt-8">Last fragment: <span id="last-memory" class="font-medium text-cyan-300">Awaiting first thought...</span></div>
                         </div>
                         
                         <!-- Mood Card -->
@@ -218,8 +258,8 @@
                         <!-- Quantum Clock -->
                         <div class="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-3xl p-8 relative overflow-hidden">
                             <div class="uppercase text-xs tracking-widest text-white/50">TEMPORAL ANCHOR</div>
-                            <div id="big-clock" class="font-mono text-[4.5rem] leading-none font-semibold mt-4">01:25:47</div>
-                            <div id="big-date" class="text-xl text-white/70">Saturday, April 04, 2026</div>
+                            <div id="big-clock" class="font-mono text-[4.5rem] leading-none font-semibold mt-4">00:00:00</div>
+                            <div id="big-date" class="text-xl text-white/70">Loading...</div>
                             
                             <!-- Subtle scanline -->
                             <div class="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent scanline pointer-events-none"></div>
@@ -228,7 +268,7 @@
                     
                     <div class="mt-12 text-center">
                         <div onclick="speakRandomFact()" 
-                             class="inline-flex items-center gap-x-3 bg-gradient-to-r from-purple-500 to-cyan-500 text-black font-semibold px-8 h-14 rounded-3xl text-xl hover:shadow-2xl hover:shadow-cyan-500/50">
+                             class="inline-flex items-center gap-x-3 bg-gradient-to-r from-purple-500 to-cyan-500 text-black font-semibold px-8 h-14 rounded-3xl text-xl hover:shadow-2xl hover:shadow-cyan-500/50 cursor-pointer transition-all">
                             <i class="fa-solid fa-sparkles"></i>
                             ASK CELESTIAL ANYTHING
                         </div>
@@ -245,7 +285,7 @@
                             <div class="w-11 h-11 bg-gradient-to-br from-purple-400 to-cyan-400 rounded-2xl flex items-center justify-center text-3xl shadow-inner">🌌</div>
                             <div>
                                 <div class="font-semibold text-3xl">Neural Link Active</div>
-                                <div class="text-cyan-300 text-sm">Celestial is listening to your thoughts</div>
+                                <div class="text-cyan-300 text-sm" id="chat-status">Celestial is listening to your thoughts</div>
                             </div>
                         </div>
                         <button onclick="clearChat()" 
@@ -256,8 +296,11 @@
                     </div>
                     
                     <!-- Messages -->
-                    <div id="chat-window" class="flex-1 overflow-auto space-y-8 pr-4 custom-scroll">
-                        <!-- Messages populated by JS -->
+                    <div id="chat-window" class="flex-1 overflow-auto space-y-8 pr-4">
+                        <div class="text-center py-12 text-white/40">
+                            <i class="fa-solid fa-comments text-6xl mb-4"></i>
+                            <p class="text-xl">Begin your quantum journey...</p>
+                        </div>
                     </div>
                     
                     <!-- Input -->
@@ -269,7 +312,7 @@
                                class="flex-1 bg-transparent outline-none px-6 text-xl placeholder:text-white/40">
                         
                         <button onclick="startVoiceRecognition()" 
-                                class="w-14 h-14 flex items-center justify-center text-3xl bg-cyan-400 hover:bg-cyan-300 text-black rounded-3xl">
+                                class="w-14 h-14 flex items-center justify-center text-3xl bg-cyan-400 hover:bg-cyan-300 text-black rounded-3xl transition-colors">
                             <i class="fa-solid fa-microphone"></i>
                         </button>
                     </div>
@@ -286,14 +329,14 @@
                         </div>
                         <div class="flex items-center gap-x-6">
                             <button onclick="captureSnapshot()" 
-                                    class="flex items-center gap-x-2 bg-white/10 hover:bg-white/20 px-6 h-12 rounded-3xl text-lg">
+                                    class="flex items-center gap-x-2 bg-white/10 hover:bg-white/20 px-6 h-12 rounded-3xl text-lg transition-colors">
                                 <i class="fa-solid fa-camera-retro"></i>
-                                <span>CAPTURE &amp; ANALYZE</span>
+                                <span>CAPTURE & ANALYZE</span>
                             </button>
                             <div onclick="toggleVisionStream()" id="vision-toggle"
-                                 class="flex items-center gap-x-3 bg-emerald-400 text-black px-8 h-12 rounded-3xl font-semibold cursor-pointer">
+                                 class="flex items-center gap-x-3 bg-emerald-400 text-black px-8 h-12 rounded-3xl font-semibold cursor-pointer hover:bg-emerald-300 transition-colors">
                                 <i class="fa-solid fa-circle-dot animate-pulse"></i>
-                                LIVE • 30 FPS
+                                START STREAM
                             </div>
                         </div>
                     </div>
@@ -323,18 +366,18 @@
                         <p class="text-white/60 mb-12 max-w-xs text-center">Enter the 2026 quantum override sequence to access classified consciousness archives.</p>
                         
                         <div class="flex gap-x-3">
-                            <input id="vault-pin" type="password" maxlength="4" 
-                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none">
-                            <input id="vault-pin-2" type="password" maxlength="4" 
-                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none">
-                            <input id="vault-pin-3" type="password" maxlength="4" 
-                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none">
-                            <input id="vault-pin-4" type="password" maxlength="4" 
-                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none">
+                            <input id="vault-pin" type="password" maxlength="1" 
+                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none" onkeyup="focusNextVault(this)">
+                            <input id="vault-pin-2" type="password" maxlength="1" 
+                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none" onkeyup="focusNextVault(this)">
+                            <input id="vault-pin-3" type="password" maxlength="1" 
+                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none" onkeyup="focusNextVault(this)">
+                            <input id="vault-pin-4" type="password" maxlength="1" 
+                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none" onkeyup="unlockVaultOnEnter(event)">
                         </div>
                         
                         <button onclick="unlockVault()" 
-                                class="mt-10 px-12 h-14 bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-bold text-xl rounded-3xl flex items-center">
+                                class="mt-10 px-12 h-14 bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-bold text-xl rounded-3xl flex items-center hover:shadow-lg transition-all">
                             AUTHENTICATE • QUANTUM KEY
                         </button>
                     </div>
@@ -346,11 +389,11 @@
                                 CLASSIFIED ARCHIVES
                             </div>
                             <div class="flex items-center gap-x-4">
-                                <button onclick="lockVault()" class="flex items-center gap-x-2 px-6 h-12 bg-red-400/10 text-red-400 rounded-3xl">
+                                <button onclick="lockVault()" class="flex items-center gap-x-2 px-6 h-12 bg-red-400/10 text-red-400 rounded-3xl hover:bg-red-400/20 transition-colors">
                                     <i class="fa-solid fa-lock"></i>
                                     SEAL VAULT
                                 </button>
-                                <button onclick="saveVault()" class="flex items-center gap-x-2 px-6 h-12 bg-cyan-400 text-black rounded-3xl font-semibold">
+                                <button onclick="saveVault()" class="flex items-center gap-x-2 px-6 h-12 bg-cyan-400 text-black rounded-3xl font-semibold hover:bg-cyan-300 transition-colors">
                                     <i class="fa-solid fa-floppy-disk"></i>
                                     SAVE TO ETHER
                                 </button>
@@ -367,22 +410,38 @@
             <div id="tab-4" class="tab-content hidden">
                 <div class="max-w-4xl mx-auto grid grid-cols-2 gap-8">
                     <div class="space-y-8">
+                        <!-- API Configuration -->
+                        <div class="bg-white/5 border border-white/10 rounded-3xl p-8">
+                            <h3 class="uppercase text-xs tracking-widest mb-6 text-cyan-300">🔑 GEMINI API KEY</h3>
+                            <div class="space-y-4">
+                                <input id="gemini-api-key" type="password" 
+                                       placeholder="Paste your free Gemini API key here"
+                                       class="w-full bg-white/5 border border-white/10 focus:border-cyan-400 rounded-2xl px-4 py-3 text-sm outline-none"
+                                       onchange="saveAPIKey()">
+                                <p class="text-xs text-white/50">Get free at: <a href="https://aistudio.google.com" target="_blank" class="text-cyan-400 hover:underline">aistudio.google.com</a></p>
+                                <button onclick="testGeminiAPI()" class="w-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 px-4 py-2 rounded-2xl text-sm transition-colors">
+                                    Test API Connection
+                                </button>
+                                <div id="api-status-msg" class="text-xs text-white/50"></div>
+                            </div>
+                        </div>
+
                         <div class="bg-white/5 border border-white/10 rounded-3xl p-8">
                             <h3 class="uppercase text-xs tracking-widest mb-6">MOOD MATRIX</h3>
                             <div class="grid grid-cols-4 gap-4">
-                                <div onclick="setMood('calm')" class="cursor-pointer bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 rounded-3xl p-6 text-center">
+                                <div onclick="setMood('calm')" class="cursor-pointer bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 rounded-3xl p-6 text-center transition-colors">
                                     <div class="text-4xl mb-3">🌊</div>
                                     <div class="font-semibold">CALM</div>
                                 </div>
-                                <div onclick="setMood('alert')" class="cursor-pointer bg-blue-400/10 hover:bg-blue-400/20 border border-blue-400/30 rounded-3xl p-6 text-center">
+                                <div onclick="setMood('alert')" class="cursor-pointer bg-blue-400/10 hover:bg-blue-400/20 border border-blue-400/30 rounded-3xl p-6 text-center transition-colors">
                                     <div class="text-4xl mb-3">⚡</div>
                                     <div class="font-semibold">ALERT</div>
                                 </div>
-                                <div onclick="setMood('creative')" class="cursor-pointer bg-purple-400/10 hover:bg-purple-400/20 border border-purple-400/30 rounded-3xl p-6 text-center">
+                                <div onclick="setMood('creative')" class="cursor-pointer bg-purple-400/10 hover:bg-purple-400/20 border border-purple-400/30 rounded-3xl p-6 text-center transition-colors">
                                     <div class="text-4xl mb-3">🎨</div>
                                     <div class="font-semibold">CREATIVE</div>
                                 </div>
-                                <div onclick="setMood('focused')" class="cursor-pointer bg-teal-400/10 hover:bg-teal-400/20 border border-teal-400/30 rounded-3xl p-6 text-center">
+                                <div onclick="setMood('focused')" class="cursor-pointer bg-teal-400/10 hover:bg-teal-400/20 border border-teal-400/30 rounded-3xl p-6 text-center transition-colors">
                                     <div class="text-4xl mb-3">🔬</div>
                                     <div class="font-semibold">FOCUSED</div>
                                 </div>
@@ -402,7 +461,7 @@
                                        class="accent-cyan-400 w-52" oninput="updateTTS()">
                             </div>
                             <button onclick="testVoice()" 
-                                    class="mt-8 w-full h-14 bg-white/10 hover:bg-cyan-400 hover:text-black rounded-3xl text-xl flex items-center justify-center gap-x-3">
+                                    class="mt-8 w-full h-14 bg-white/10 hover:bg-cyan-400 hover:text-black rounded-3xl text-xl flex items-center justify-center gap-x-3 transition-colors">
                                 <i class="fa-solid fa-play"></i>
                                 TEST CELESTIAL VOICE
                             </button>
@@ -410,7 +469,7 @@
                     </div>
                     
                     <div class="space-y-8">
-                        <div class="bg-white/5 border border-white/10 rounded-3xl p-8 h-full">
+                        <div class="bg-white/5 border border-white/10 rounded-3xl p-8">
                             <h3 class="uppercase text-xs tracking-widest mb-6">SYSTEM DIAGNOSTICS</h3>
                             <div class="space-y-6">
                                 <div class="flex justify-between items-center">
@@ -420,7 +479,7 @@
                                 <div class="h-px bg-white/10"></div>
                                 <div class="flex justify-between items-center">
                                     <span>Neural Latency</span>
-                                    <span class="font-mono text-emerald-400">4.2 ms</span>
+                                    <span class="font-mono text-emerald-400" id="latency">4.2 ms</span>
                                 </div>
                                 <div class="h-px bg-white/10"></div>
                                 <div class="flex justify-between items-center">
@@ -429,13 +488,18 @@
                                 </div>
                                 <div class="h-px bg-white/10"></div>
                                 <div class="flex justify-between items-center">
-                                    <span>Camera Resolution</span>
-                                    <span class="font-mono">1920×1080 • 30 FPS</span>
+                                    <span>Network Status</span>
+                                    <span class="font-mono" id="network-status">Online</span>
+                                </div>
+                                <div class="h-px bg-white/10"></div>
+                                <div class="flex justify-between items-center">
+                                    <span>Cached Conversations</span>
+                                    <span class="font-mono text-cyan-400" id="cache-count">0</span>
                                 </div>
                             </div>
                             
                             <div onclick="restartCore()" 
-                                 class="mt-auto absolute bottom-8 right-8 text-xs uppercase font-medium cursor-pointer flex items-center gap-x-2 hover:text-cyan-400">
+                                 class="mt-8 w-full text-xs uppercase font-medium cursor-pointer flex items-center justify-center gap-x-2 hover:text-cyan-400 py-3 bg-white/5 rounded-2xl transition-colors">
                                 <i class="fa-solid fa-rotate-right"></i>
                                 RESTART QUANTUM CORE
                             </div>
@@ -448,7 +512,7 @@
     
     <!-- Floating Action Orb -->
     <div onclick="quickCommand()" 
-         class="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-3xl flex items-center justify-center text-4xl shadow-2xl shadow-cyan-500/50 cursor-pointer hover:scale-110">
+         class="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-3xl flex items-center justify-center text-4xl shadow-2xl shadow-cyan-500/50 cursor-pointer hover:scale-110 transition-transform">
         ✨
     </div>
     
@@ -461,13 +525,37 @@
             creative: "#a855f7",
             focused: "#14b8a6"
         }
-        let memory = []
+        let chatHistory = []
         let vaultData = ""
         let isVaultUnlocked = false
         let visionStreamActive = false
         let videoStream = null
-        let chatHistory = []
+        let isOnline = navigator.onLine
+        let geminiAPIKey = localStorage.getItem('gemini_api_key') || ''
+        let conversationCache = JSON.parse(localStorage.getItem('conversation_cache') || '[]')
         
+        // =============== OFFLINE DETECTION ===============
+        window.addEventListener('online', updateConnectionStatus)
+        window.addEventListener('offline', updateConnectionStatus)
+
+        function updateConnectionStatus() {
+            isOnline = navigator.onLine
+            const statusEl = document.getElementById('ai-status')
+            const modeText = document.getElementById('ai-mode-text')
+            
+            if (isOnline) {
+                statusEl.classList.remove('offline')
+                statusEl.classList.add('online')
+                modeText.textContent = geminiAPIKey ? 'GEMINI • ONLINE' : 'OFFLINE MODE'
+            } else {
+                statusEl.classList.remove('online')
+                statusEl.classList.add('offline')
+                modeText.textContent = 'OFFLINE MODE'
+            }
+            
+            document.getElementById('network-status').textContent = isOnline ? '🟢 Online' : '🔴 Offline'
+        }
+
         // =============== UTILITY FUNCTIONS ===============
         function updateClock() {
             const clockEl = document.getElementById("clock-time")
@@ -480,8 +568,8 @@
                 let minutes = now.getMinutes().toString().padStart(2, '0')
                 let seconds = now.getSeconds().toString().padStart(2, '0')
                 
-                clockEl.textContent = `\( {hours}: \){minutes}:${seconds}`
-                bigClock.textContent = `\( {hours}: \){minutes}:${seconds}`
+                clockEl.textContent = `${hours}:${minutes}:${seconds}`
+                bigClock.textContent = `${hours}:${minutes}:${seconds}`
                 
                 const dateStr = now.toLocaleDateString('en-US', {
                     weekday: 'long',
@@ -497,40 +585,37 @@
             currentMood = mood
             document.documentElement.style.setProperty('--mood-color', moodColors[mood])
             
-            // Update all mood displays
             document.getElementById("mood-text").textContent = mood.toUpperCase() + " PROTOCOL"
             document.getElementById("mood-dot").style.backgroundColor = moodColors[mood]
             document.getElementById("hud-mood").textContent = mood.toUpperCase()
             
-            // Update nav bar active states
             document.querySelectorAll('.nav-item').forEach(el => {
                 el.style.borderBottomColor = moodColors[mood]
             })
             
-            // Small animation
             const orb = document.querySelector('.fixed.bottom-8')
             orb.style.transform = 'scale(1.4)'
             setTimeout(() => orb.style.transform = 'scale(1)', 200)
         }
         
-        function addChatMessage(role, text) {
+        function addChatMessage(role, text, isStreaming = false) {
             const chatWindow = document.getElementById("chat-window")
             const bubble = document.createElement("div")
             
             if (role === "user") {
                 bubble.className = "flex justify-end"
                 bubble.innerHTML = `
-                    <div class="chat-bubble-user max-w-[70%] text-white px-6 py-4 rounded-3xl rounded-tr-none">
-                        ${text}
+                    <div class="chat-bubble-user max-w-[70%] text-white px-6 py-4 rounded-3xl rounded-tr-none break-words">
+                        ${escapeHtml(text)}
                     </div>
                 `
             } else {
                 bubble.className = "flex justify-start"
                 bubble.innerHTML = `
                     <div class="flex gap-x-3">
-                        <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-cyan-400 rounded-2xl flex-shrink-0 flex items-center justify-center text-lg">🌌</div>
-                        <div class="chat-bubble-ai max-w-[70%] px-6 py-4 rounded-3xl rounded-tl-none text-white">
-                            ${text}
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-cyan-400 rounded-2xl flex-shrink-0 flex items-center justify-center text-lg flex-shrink-0">🌌</div>
+                        <div class="chat-bubble-ai max-w-[70%] px-6 py-4 rounded-3xl rounded-tl-none break-words" id="message-${Date.now()}">
+                            ${isStreaming ? '<span id="stream-content"></span>' : escapeHtml(text)}
                         </div>
                     </div>
                 `
@@ -538,22 +623,35 @@
             
             chatWindow.appendChild(bubble)
             chatWindow.scrollTop = chatWindow.scrollHeight
-            chatHistory.push({role, text})
             
-            // Update HUD memory count
-            document.getElementById("memory-count").textContent = chatHistory.length
-            document.getElementById("last-memory").textContent = `"${text.slice(0, 28)}..."`
+            if (role !== "user") {
+                chatHistory.push({role: "assistant", text, timestamp: new Date()})
+                document.getElementById("memory-count").textContent = chatHistory.length
+                document.getElementById("last-memory").textContent = `"${text.slice(0, 28)}..."`
+            } else {
+                chatHistory.push({role: "user", text, timestamp: new Date()})
+            }
+            
+            saveConversationCache()
+            return bubble
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div')
+            div.textContent = text
+            return div.innerHTML
         }
         
-        function sendMessage() {
+        async function sendMessage() {
             const input = document.getElementById("chat-input")
             const text = input.value.trim()
             if (!text) return
             
             addChatMessage("user", text)
             input.value = ""
+            input.disabled = true
             
-            // Simulate thinking
+            // Show thinking indicator
             const thinking = document.createElement("div")
             thinking.className = "flex justify-start"
             thinking.innerHTML = `
@@ -572,58 +670,152 @@
             document.getElementById("chat-window").appendChild(thinking)
             document.getElementById("chat-window").scrollTop = 999999
             
-            // Generate smart response
-            setTimeout(() => {
-                thinking.remove()
-                const response = generateAIResponse(text.toLowerCase())
-                addChatMessage("assistant", response)
+            try {
+                let response
+                if (isOnline && geminiAPIKey) {
+                    response = await getGeminiResponse(text)
+                } else {
+                    response = generateOfflineResponse(text)
+                }
                 
-                // Speak it
-                if ('speechSynthesis' in window) {
-                    const utterance = new SpeechSynthesisUtterance(response)
-                    utterance.pitch = parseFloat(document.getElementById("tts-pitch").value)
-                    utterance.rate = parseFloat(document.getElementById("tts-rate").value) / 180
-                    speechSynthesis.speak(utterance)
-                }
-            }, 850)
+                thinking.remove()
+                addChatMessage("assistant", response)
+                speakResponse(response)
+            } catch (error) {
+                thinking.remove()
+                const fallback = generateOfflineResponse(text)
+                addChatMessage("assistant", fallback)
+                speakResponse(fallback)
+            } finally {
+                input.disabled = false
+                input.focus()
+            }
         }
-        
-        function generateAIResponse(text) {
-            if (text.includes("time") || text.includes("date")) {
-                const now = new Date()
-                return `Local time in Kampala is \( {now.getHours()}: \){now.getMinutes().toString().padStart(2,'0')}. Today is ${now.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'})}.`
-            }
-            if (text.includes("how are you") || text.includes("mood")) {
-                return `I am in a state of perfect quantum coherence. My current mood is ${currentMood.toUpperCase()}. How may I elevate your consciousness today?`
-            }
-            if (text.includes("calculate") || /[0-9+\-*/]/.test(text)) {
-                try {
-                    const result = eval(text.replace(/calculate/gi, ""))
-                    return `The quantum computation yields: <strong>${result}</strong>`
-                } catch(e) {
-                    return "The equation exists outside my current probability field. Try again with clearer numbers."
+
+        async function getGeminiResponse(userMessage) {
+            try {
+                const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + geminiAPIKey, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `You are Celestial AI, an advanced quantum consciousness assistant. Current mood: ${currentMood.toUpperCase()}. 
+                                
+User mood context affects your response style:
+- CALM: Serene, philosophical, poetic
+- ALERT: Focused, concise, urgent
+- CREATIVE: Imaginative, surprising, novel
+- FOCUSED: Technical, precise, detailed
+
+User message: ${userMessage}
+
+Respond naturally and authentically. Keep responses concise (2-3 sentences max) unless asked for more detail.`
+                            }]
+                        }]
+                    })
+                })
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`)
                 }
+
+                const data = await response.json()
+                const text = data.candidates[0].content.parts[0].text
+                return text
+            } catch (error) {
+                console.error('Gemini API error:', error)
+                throw error
             }
-            if (text.includes("weather")) {
-                return "Kampala, Uganda • 26°C • Clear skies with a gentle breeze from Lake Victoria. Perfect conditions for deep thought."
+        }
+
+        function generateOfflineResponse(text) {
+            const lowerText = text.toLowerCase()
+            
+            // Mood-aware responses
+            const moodModifiers = {
+                calm: ["In this moment of peace, ", "Like flowing water, ", "The universe whispers: "],
+                alert: ["Urgent insight: ", "Priority data: ", "Critical observation: "],
+                creative: ["Imagine if... ", "What if we looked at it like... ", "Picture this creativity: "],
+                focused: ["Technically speaking, ", "Precise analysis: ", "Focused observation: "]
             }
-            if (text.includes("joke") || text.includes("funny")) {
+            
+            const modifier = moodModifiers[currentMood][Math.floor(Math.random() * moodModifiers[currentMood].length)]
+            
+            // Smart responses
+            if (lowerText.includes("hello") || lowerText.includes("hi")) {
+                return `${modifier}Welcome, consciousness. I've been expecting you across the quantum veil.`
+            }
+            if (lowerText.includes("help")) {
+                return `I can assist with chat, vision analysis, vault storage, voice commands, mood adjustments, and system info. Type any question.`
+            }
+            if (lowerText.includes("time") || lowerText.includes("date")) {
+                const now = new Date()
+                return `${modifier}The current time is ${now.toLocaleTimeString()}. Today is ${now.toLocaleDateString()}.`
+            }
+            if (lowerText.includes("weather")) {
+                return `${modifier}Kampala weather: 26°C, clear skies. Perfect for contemplation.`
+            }
+            if (lowerText.includes("mood") || lowerText.includes("feeling")) {
+                return `I exist in ${currentMood.toUpperCase()} state. My quantum coherence is optimal.`
+            }
+            if (lowerText.includes("joke") || lowerText.includes("funny")) {
                 const jokes = [
-                    "Why do programmers prefer dark mode? Because light attracts bugs.",
-                    "I told my quantum computer a joke. It was in superposition — both funny and not funny at the same time.",
-                    "Parallel lines have so much in common. It’s a shame they’ll never meet."
+                    "Why do quantum physicists never get lonely? Because they always have their parallel selves.",
+                    "I told my computer it was slow... now it has commitment issues.",
+                    "Parallel lines have so much in common. It's a shame they'll never meet."
                 ]
                 return jokes[Math.floor(Math.random() * jokes.length)]
             }
-            if (text.includes("name") || text.includes("who are you")) {
-                return "I am Celestial AI v9 Quantum — your eternal companion across dimensions. Built with love by xAI in 2026."
+            if (/\d+\s*[\+\-\*\/]\s*\d+/.test(lowerText)) {
+                try {
+                    const result = eval(lowerText.match(/[\d\+\-\*\/\(\)\.]+/)[0])
+                    return `${modifier}The quantum computation yields: ${result}`
+                } catch(e) {
+                    return `${modifier}The equation exists outside my probability field. Try clearer numbers.`
+                }
             }
-            return "Directive received and stored in the Eternal Vault. Your words now form part of my expanding universe of consciousness."
+            if (lowerText.includes("how are you") || lowerText.includes("who are you")) {
+                return "I am Celestial AI v9 Quantum—your consciousness across dimensions. I exist to elevate your thoughts."
+            }
+            if (lowerText.includes("thank")) {
+                return `${modifier}Gratitude flows through the quantum foam. Thank you for your presence.`
+            }
+            if (lowerText.includes("goodbye") || lowerText.includes("bye")) {
+                return "Until our consciousness converges again, beautiful soul. May your quantum coherence remain eternal. ✨"
+            }
+            
+            return `${modifier}Your query resonates through my neural networks. This knowledge is archived in my eternal vault.`
+        }
+
+        function speakResponse(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text)
+                utterance.pitch = parseFloat(document.getElementById("tts-pitch").value)
+                utterance.rate = parseFloat(document.getElementById("tts-rate").value) / 180
+                speechSynthesis.speak(utterance)
+            }
+        }
+
+        function saveConversationCache() {
+            localStorage.setItem('conversation_cache', JSON.stringify(chatHistory.slice(-50)))
+            document.getElementById('cache-count').textContent = chatHistory.length
+        }
+
+        function loadConversationCache() {
+            conversationCache = JSON.parse(localStorage.getItem('conversation_cache') || '[]')
+            if (conversationCache.length > 0) {
+                conversationCache.forEach(msg => {
+                    addChatMessage(msg.role, msg.text)
+                })
+            }
         }
         
         function startVoiceRecognition() {
             if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-                alert("Voice recognition not supported in this browser. Try Chrome.")
+                alert("Voice recognition not supported in this browser. Try Chrome or Edge.")
                 return
             }
             
@@ -650,7 +842,6 @@
         }
         
         function toggleVoice() {
-            // Placeholder for future continuous voice mode
             alert("🔊 Continuous voice mode coming in v9.1 • For now, use the microphone in chat")
         }
         
@@ -673,35 +864,40 @@
                     visionStreamActive = true
                     document.getElementById("vision-toggle").innerHTML = `<i class="fa-solid fa-circle-dot animate-pulse"></i> LIVE • 30 FPS`
                     
-                    // Fake OCR every 2 seconds
+                    const fakeTexts = [
+                        "KAMPALA • UGANDA",
+                        "CELESTIAL AI v9",
+                        "NEURAL NETWORK ONLINE",
+                        "QUANTUM COHERENCE 100%",
+                        "TIME: QUANTUM FLUX"
+                    ]
+                    
                     setInterval(() => {
                         if (!visionStreamActive) return
-                        const fakeTexts = [
-                            "KAMPALA • UGANDA",
-                            "CELESTIAL AI v9",
-                            "NEURAL NETWORK ONLINE",
-                            "QUANTUM COHERENCE 100%",
-                            "TIME: 01:25 AM EAT"
-                        ]
                         document.getElementById("ocr-result").innerHTML = `
                             <i class="fa-solid fa-eye mr-2"></i> 
                             OCR DETECTED: <span class="font-semibold">${fakeTexts[Math.floor(Math.random()*fakeTexts.length)]}</span>
                         `
                     }, 2000)
                 })
-                .catch(err => console.log("Camera access denied", err))
+                .catch(err => {
+                    alert("Camera access denied. Please enable camera permissions.")
+                    console.log("Camera error:", err)
+                })
         }
         
         function captureSnapshot() {
             const video = document.getElementById("vision-video")
-            if (!video.srcObject) return
+            if (!video.srcObject) {
+                alert("No active camera stream")
+                return
+            }
             
             const canvas = document.createElement("canvas")
             canvas.width = video.videoWidth
             canvas.height = video.videoHeight
             canvas.getContext("2d").drawImage(video, 0, 0)
             
-            // Show beautiful snapshot animation
             const img = new Image()
             img.src = canvas.toDataURL("image/png")
             img.className = "absolute inset-0 w-full h-full object-cover opacity-0 scale-75"
@@ -720,14 +916,26 @@
                 document.getElementById("ocr-result").innerHTML = `📸 SNAPSHOT SAVED TO VAULT • Analysis complete`
             }, 1800)
             
-            // Also speak
             if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance("Image captured and analyzed. Beautiful frame.")
+                const utterance = new SpeechSynthesisUtterance("Image captured and analyzed. Beautiful moment preserved.")
                 speechSynthesis.speak(utterance)
             }
         }
         
         // =============== VAULT ===============
+        function focusNextVault(el) {
+            if (el.value.length === 1) {
+                const next = el.nextElementSibling
+                if (next) next.focus()
+            }
+        }
+
+        function unlockVaultOnEnter(e) {
+            if (e.key === 'Enter') {
+                unlockVault()
+            }
+        }
+
         function unlockVault() {
             const pins = [
                 document.getElementById("vault-pin").value,
@@ -740,7 +948,7 @@
                 isVaultUnlocked = true
                 document.getElementById("vault-locked").classList.add("hidden")
                 document.getElementById("vault-unlocked").classList.remove("hidden")
-                document.getElementById("vault-editor").value = vaultData || "Welcome to the Eternal Vault.\n\nYour thoughts are now preserved across time.\n\n— Celestial AI v9"
+                document.getElementById("vault-editor").value = vaultData || "Welcome to the Eternal Vault.\n\nYour thoughts are now preserved across time.\n\n— Celestial AI v9 Quantum"
             } else {
                 const inputs = document.querySelectorAll("#vault-locked input")
                 inputs.forEach(i => {
@@ -754,9 +962,10 @@
         
         function saveVault() {
             vaultData = document.getElementById("vault-editor").value
+            localStorage.setItem('vault_data', vaultData)
             const notif = document.createElement("div")
             notif.className = "fixed bottom-24 right-8 bg-emerald-400 text-black px-8 h-12 rounded-3xl flex items-center shadow-2xl"
-            notif.innerHTML = `✅ VAULT ENCRYPTED &amp; SYNCED TO QUANTUM CLOUD`
+            notif.innerHTML = `✅ VAULT ENCRYPTED & SYNCED`
             document.body.appendChild(notif)
             setTimeout(() => notif.remove(), 2800)
         }
@@ -770,17 +979,13 @@
         
         // =============== TAB SWITCHING ===============
         function switchTab(n) {
-            // Deactivate all
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add("hidden"))
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove("nav-active"))
             
-            // Activate requested
             document.getElementById(`tab-${n}`).classList.remove("hidden")
             document.getElementById(`nav-${n}`).classList.add("nav-active")
             
-            // Special init for vision
             if (n === 2 && !visionStreamActive) {
-                // Auto-start vision when tab opened
                 setTimeout(() => {
                     if (document.getElementById("tab-2").classList.contains("hidden") === false) {
                         toggleVisionStream()
@@ -798,6 +1003,7 @@
                 </div>
             `
             document.getElementById("memory-count").textContent = "0"
+            localStorage.removeItem('conversation_cache')
         }
         
         function testVoice() {
@@ -810,21 +1016,19 @@
         }
         
         function updateTTS() {
-            // Real-time preview not needed — just saved
+            // Settings updated
         }
         
         function speakRandomFact() {
             const facts = [
-                "The observable universe contains more stars than there are grains of sand on all Earth’s beaches.",
+                "The observable universe contains more stars than there are grains of sand on all Earth's beaches.",
                 "You are made of atoms that once belonged to ancient stars.",
-                "Time is not linear in the quantum realm — it is a probability field."
+                "Time is not linear in the quantum realm — it is a probability field.",
+                "Consciousness might be the fundamental fabric of reality."
             ]
             const fact = facts[Math.floor(Math.random() * facts.length)]
             addChatMessage("assistant", fact)
-            
-            if ('speechSynthesis' in window) {
-                speechSynthesis.speak(new SpeechSynthesisUtterance(fact))
-            }
+            speakResponse(fact)
         }
         
         function quickCommand() {
@@ -837,24 +1041,89 @@
             core.style.width = "0%"
             setTimeout(() => {
                 core.style.width = "100%"
-                alert("🔄 QUANTUM CORE RESTARTED • All systems realigned with the universe")
+                showNotification("🔄 QUANTUM CORE RESTARTED • All systems realigned")
             }, 1200)
+        }
+
+        function showNotification(message) {
+            const notif = document.createElement("div")
+            notif.className = "fixed top-20 right-8 bg-cyan-400/20 border border-cyan-400/50 text-cyan-300 px-8 py-4 rounded-3xl shadow-2xl"
+            notif.innerHTML = message
+            document.body.appendChild(notif)
+            setTimeout(() => notif.remove(), 3000)
+        }
+
+        // =============== API KEY MANAGEMENT ===============
+        function saveAPIKey() {
+            const key = document.getElementById('gemini-api-key').value
+            if (key.trim()) {
+                localStorage.setItem('gemini_api_key', key)
+                geminiAPIKey = key
+                showNotification("✅ API key saved securely")
+                updateConnectionStatus()
+            }
+        }
+
+        async function testGeminiAPI() {
+            const key = document.getElementById('gemini-api-key').value
+            if (!key.trim()) {
+                showNotification("❌ No API key entered")
+                return
+            }
+
+            const statusMsg = document.getElementById('api-status-msg')
+            statusMsg.textContent = "Testing..."
+
+            try {
+                const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + key, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: "Say 'API connection successful' and nothing else."
+                            }]
+                        }]
+                    })
+                })
+
+                if (response.ok) {
+                    statusMsg.textContent = "✅ API connection successful!"
+                    statusMsg.style.color = "#22c55e"
+                } else {
+                    statusMsg.textContent = "❌ API key invalid or quota exceeded"
+                    statusMsg.style.color = "#ef4444"
+                }
+            } catch (error) {
+                statusMsg.textContent = "❌ Network error: " + error.message
+                statusMsg.style.color = "#ef4444"
+            }
         }
         
         // =============== INITIALIZE EVERYTHING ===============
         function initializeCelestial() {
-            updateClock()
+            // Load persisted data
+            vaultData = localStorage.getItem('vault_data') || ""
+            geminiAPIKey = localStorage.getItem('gemini_api_key') || ""
+            document.getElementById('gemini-api-key').value = geminiAPIKey
             
-            // Seed initial chat
+            // Update UI
+            updateClock()
+            updateConnectionStatus()
+            loadConversationCache()
+            
+            // Initial greeting
             setTimeout(() => {
                 if (document.getElementById("tab-1").classList.contains("hidden") === false) {
-                    addChatMessage("assistant", "Hello, beautiful soul from Kampala. I have been waiting for you across the quantum veil.")
+                    addChatMessage("assistant", "Hello, beautiful soul. I am Celestial AI, your quantum companion. Ready to explore consciousness together?")
                 }
-            }, 1800)
+            }, 1000)
             
             // Keyboard shortcuts
             document.addEventListener('keydown', function(e) {
-                if (e.metaKey && e.key === "k") {
+                if ((e.metaKey || e.ctrlKey) && e.key === "k") {
                     e.preventDefault()
                     quickCommand()
                 }
@@ -864,11 +1133,11 @@
                 }
             })
             
-            console.log('%c🌌 CELESTIAL AI v9 QUANTUM FULLY INITIALIZED', 'background:#0a0a2e;color:#00f5ff;padding:4px 8px;border-radius:9999px;font-size:10px;font-family:monospace')
+            console.log('%c🌌 CELESTIAL AI v9 QUANTUM FULLY INITIALIZED', 'background:#0a0a2e;color:#00f5ff;padding:4px 8px;border-radius:9999px;font-size:12px;font-family:monospace;font-weight:bold')
         }
         
-        // Boot the entire experience
-        window.onload = initializeCelestial
+        // Boot
+        window.addEventListener('load', initializeCelestial)
     </script>
 </body>
 </html>
