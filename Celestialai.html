@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celestial AI • v9 Quantum</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        
+        :root {
+            --mood-color: #00f5ff;
+        }
+        
+        * {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+        
+        .celestial-bg {
+            background: radial-gradient(circle at 50% 20%, #0a0a2e 0%, #000000 70%);
+        }
+        
+        .hud-glow {
+            box-shadow: 
+                0 0 30px -10px var(--mood-color),
+                0 0 60px -20px var(--mood-color);
+        }
+        
+        .chat-bubble-user {
+            background: linear-gradient(135deg, #00f5ff, #0099cc);
+            box-shadow: 0 10px 15px -3px rgb(0 245 255);
+        }
+        
+        .chat-bubble-ai {
+            background: rgba(17, 17, 34, 0.95);
+            backdrop-filter: blur(20px);
+        }
+        
+        .nav-active {
+            background: rgba(0, 245, 255, 0.15);
+            border-bottom: 3px solid var(--mood-color);
+        }
+        
+        .scanline {
+            animation: scan 4s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(300%); }
+        }
+        
+        .quantum-ring {
+            animation: quantum-pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="celestial-bg text-white font-sans overflow-hidden h-screen flex flex-col">
+    <!-- Top Status Bar -->
+    <div class="h-14 bg-black/70 backdrop-blur-xl border-b border-white/10 flex items-center px-8 z-50">
+        <div class="flex items-center gap-x-3">
+            <div class="w-8 h-8 rounded-2xl bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-xl shadow-inner">
+                ✨
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold tracking-tighter" style="font-family: 'Space Grotesk', sans-serif;">
+                    CELESTIAL <span class="text-cyan-400">AI</span>
+                </h1>
+                <div class="text-[10px] text-cyan-300 tracking-[2px] -mt-1">v9 QUANTUM • LIVE CORE</div>
+            </div>
+        </div>
+        
+        <!-- Dynamic Mood Indicator -->
+        <div id="mood-indicator" class="ml-auto flex items-center gap-x-2 px-6 py-1.5 bg-white/5 rounded-3xl border border-white/10">
+            <div id="mood-dot" class="w-3 h-3 bg-cyan-400 rounded-full quantum-ring"></div>
+            <span id="mood-text" class="text-sm font-medium uppercase tracking-widest">CALM PROTOCOL</span>
+        </div>
+        
+        <!-- Live Clock -->
+        <div id="live-clock" class="font-mono text-lg tabular-nums px-8 border-l border-white/10 flex items-center gap-x-2">
+            <i class="fa-solid fa-clock text-cyan-400"></i>
+            <span class="text-2xl font-semibold" id="clock-time">00:00:00</span>
+        </div>
+        
+        <div class="flex items-center gap-x-6 text-sm">
+            <div class="flex items-center gap-x-1.5">
+                <i class="fa-solid fa-location-dot text-emerald-400"></i>
+                <span class="text-emerald-400 font-medium">Kampala, Uganda</span>
+            </div>
+            <div onclick="toggleVoice()" id="voice-status" class="flex items-center gap-x-2 cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-4 py-1 rounded-2xl text-xs font-semibold">
+                <i class="fa-solid fa-microphone"></i>
+                <span>VOICE READY</span>
+            </div>
+            <button onclick="toggleVision()" 
+                    class="flex items-center justify-center w-9 h-9 hover:bg-white/10 rounded-2xl text-xl">
+                <i class="fa-solid fa-camera"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar Navigation -->
+        <div class="w-72 bg-black/60 backdrop-blur-2xl border-r border-white/10 p-6 flex flex-col">
+            <div onclick="switchTab(0)" id="nav-0"
+                 class="nav-item flex items-center gap-x-4 px-5 py-4 rounded-3xl mb-2 cursor-pointer nav-active">
+                <i class="fa-solid fa-house text-2xl w-8"></i>
+                <div>
+                    <div class="font-semibold text-lg">Quantum HUD</div>
+                    <div class="text-xs text-cyan-300">Real-time consciousness</div>
+                </div>
+            </div>
+            
+            <div onclick="switchTab(1)" id="nav-1"
+                 class="nav-item flex items-center gap-x-4 px-5 py-4 rounded-3xl mb-2 cursor-pointer">
+                <i class="fa-solid fa-comments text-2xl w-8"></i>
+                <div>
+                    <div class="font-semibold text-lg">Neural Link</div>
+                    <div class="text-xs text-cyan-300">Speak • Type • Connect</div>
+                </div>
+            </div>
+            
+            <div onclick="switchTab(2)" id="nav-2"
+                 class="nav-item flex items-center gap-x-4 px-5 py-4 rounded-3xl mb-2 cursor-pointer">
+                <i class="fa-solid fa-eye text-2xl w-8"></i>
+                <div>
+                    <div class="font-semibold text-lg">Omni-Vision</div>
+                    <div class="text-xs text-cyan-300">Live camera + OCR + AI</div>
+                </div>
+            </div>
+            
+            <div onclick="switchTab(3)" id="nav-3"
+                 class="nav-item flex items-center gap-x-4 px-5 py-4 rounded-3xl mb-2 cursor-pointer">
+                <i class="fa-solid fa-vault text-2xl w-8"></i>
+                <div>
+                    <div class="font-semibold text-lg">Eternal Vault</div>
+                    <div class="text-xs text-cyan-300">Quantum-encrypted memory</div>
+                </div>
+            </div>
+            
+            <div onclick="switchTab(4)" id="nav-4"
+                 class="nav-item flex items-center gap-x-4 px-5 py-4 rounded-3xl cursor-pointer">
+                <i class="fa-solid fa-sliders text-2xl w-8"></i>
+                <div>
+                    <div class="font-semibold text-lg">Core Settings</div>
+                    <div class="text-xs text-cyan-300">Moods • Voice • System</div>
+                </div>
+            </div>
+            
+            <!-- AI Status -->
+            <div class="mt-auto pt-8">
+                <div class="bg-gradient-to-br from-purple-500/10 to-cyan-500/10 border border-white/10 rounded-3xl p-5">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="text-xs uppercase tracking-widest font-medium">Core Status</div>
+                        <div id="core-status" class="px-3 py-0.5 text-[10px] font-bold bg-emerald-400 text-black rounded-2xl">ONLINE • 100%</div>
+                    </div>
+                    <div class="h-2 bg-white/10 rounded-3xl overflow-hidden">
+                        <div id="core-bar" class="h-full w-[100%] bg-gradient-to-r from-cyan-400 to-purple-400 rounded-3xl"></div>
+                    </div>
+                    <div class="text-xs text-white/60 mt-4 flex items-center gap-x-2">
+                        <span class="flex-1">Memory: <span id="memory-count" class="font-mono text-cyan-400">47</span> fragments</span>
+                        <span class="flex-1 text-right">Mood stability: <span id="mood-stability" class="font-mono text-cyan-400">98.4%</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center text-[10px] text-white/30 mt-8 flex items-center justify-center gap-x-1">
+                <i class="fa-solid fa-atom"></i>
+                BUILT WITH PURE INTENTION • 2026
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="main-content" class="flex-1 p-8 overflow-auto">
+            
+            <!-- HUD TAB (index 0) -->
+            <div id="tab-0" class="tab-content">
+                <div class="max-w-5xl mx-auto">
+                    <div class="flex justify-center items-center mb-8">
+                        <div class="inline-flex items-center gap-x-4 bg-black/40 backdrop-blur-3xl px-10 py-5 rounded-[3rem] border border-white/10 hud-glow">
+                            <div class="text-7xl font-bold tracking-[-4px]" style="font-family: 'Space Grotesk', sans-serif;" id="hud-title">CELESTIAL OS</div>
+                            <div id="mood-icon" class="text-7xl">🌌</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-6">
+                        <!-- Memory Card -->
+                        <div class="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-3xl p-8 hover:border-cyan-400/30 group">
+                            <div class="flex justify-between">
+                                <div>
+                                    <div class="uppercase text-xs tracking-widest text-white/50">NEURAL MEMORY</div>
+                                    <div id="hud-memory" class="text-6xl font-semibold mt-2 font-mono">47</div>
+                                </div>
+                                <i class="fa-solid fa-brain text-5xl text-cyan-400 group-hover:scale-110"></i>
+                            </div>
+                            <div class="text-sm text-white/60 mt-8">Last fragment: <span id="last-memory" class="font-medium text-cyan-300">"What is the nature of time?"</span></div>
+                        </div>
+                        
+                        <!-- Mood Card -->
+                        <div class="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-3xl p-8 hover:border-cyan-400/30 group">
+                            <div class="flex justify-between">
+                                <div>
+                                    <div class="uppercase text-xs tracking-widest text-white/50">CURRENT MOOD</div>
+                                    <div id="hud-mood" class="text-6xl font-semibold mt-2">CALM</div>
+                                </div>
+                                <i class="fa-solid fa-heart-pulse text-5xl text-purple-400 group-hover:scale-110"></i>
+                            </div>
+                            <div class="mt-8 flex gap-x-2">
+                                <div onclick="setMood('calm')" class="cursor-pointer flex-1 h-2 bg-cyan-400 rounded-3xl"></div>
+                                <div onclick="setMood('alert')" class="cursor-pointer flex-1 h-2 bg-blue-400 rounded-3xl"></div>
+                                <div onclick="setMood('creative')" class="cursor-pointer flex-1 h-2 bg-purple-400 rounded-3xl"></div>
+                                <div onclick="setMood('focused')" class="cursor-pointer flex-1 h-2 bg-teal-400 rounded-3xl"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quantum Clock -->
+                        <div class="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-3xl p-8 relative overflow-hidden">
+                            <div class="uppercase text-xs tracking-widest text-white/50">TEMPORAL ANCHOR</div>
+                            <div id="big-clock" class="font-mono text-[4.5rem] leading-none font-semibold mt-4">01:25:47</div>
+                            <div id="big-date" class="text-xl text-white/70">Saturday, April 04, 2026</div>
+                            
+                            <!-- Subtle scanline -->
+                            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent scanline pointer-events-none"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-12 text-center">
+                        <div onclick="speakRandomFact()" 
+                             class="inline-flex items-center gap-x-3 bg-gradient-to-r from-purple-500 to-cyan-500 text-black font-semibold px-8 h-14 rounded-3xl text-xl hover:shadow-2xl hover:shadow-cyan-500/50">
+                            <i class="fa-solid fa-sparkles"></i>
+                            ASK CELESTIAL ANYTHING
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CHAT TAB (index 1) -->
+            <div id="tab-1" class="tab-content hidden">
+                <div class="max-w-4xl mx-auto h-full flex flex-col">
+                    <!-- Chat header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-x-4">
+                            <div class="w-11 h-11 bg-gradient-to-br from-purple-400 to-cyan-400 rounded-2xl flex items-center justify-center text-3xl shadow-inner">🌌</div>
+                            <div>
+                                <div class="font-semibold text-3xl">Neural Link Active</div>
+                                <div class="text-cyan-300 text-sm">Celestial is listening to your thoughts</div>
+                            </div>
+                        </div>
+                        <button onclick="clearChat()" 
+                                class="flex items-center gap-x-2 text-xs uppercase font-medium px-5 py-3 rounded-3xl bg-white/10 hover:bg-red-500/10 hover:text-red-300">
+                            <i class="fa-solid fa-trash"></i>
+                            CLEAR MEMORY
+                        </button>
+                    </div>
+                    
+                    <!-- Messages -->
+                    <div id="chat-window" class="flex-1 overflow-auto space-y-8 pr-4 custom-scroll">
+                        <!-- Messages populated by JS -->
+                    </div>
+                    
+                    <!-- Input -->
+                    <div class="mt-6 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-3xl p-3 flex items-center">
+                        <input id="chat-input" 
+                               onkeydown="if(event.keyCode===13) sendMessage()"
+                               type="text" 
+                               placeholder="Speak your command or type here..."
+                               class="flex-1 bg-transparent outline-none px-6 text-xl placeholder:text-white/40">
+                        
+                        <button onclick="startVoiceRecognition()" 
+                                class="w-14 h-14 flex items-center justify-center text-3xl bg-cyan-400 hover:bg-cyan-300 text-black rounded-3xl">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- VISION TAB (index 2) -->
+            <div id="tab-2" class="tab-content hidden flex flex-col">
+                <div class="flex-1 flex flex-col max-w-6xl mx-auto w-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-x-3">
+                            <i class="fa-solid fa-eye text-4xl text-cyan-400"></i>
+                            <div class="text-4xl font-semibold">Omni-Vision Stream</div>
+                        </div>
+                        <div class="flex items-center gap-x-6">
+                            <button onclick="captureSnapshot()" 
+                                    class="flex items-center gap-x-2 bg-white/10 hover:bg-white/20 px-6 h-12 rounded-3xl text-lg">
+                                <i class="fa-solid fa-camera-retro"></i>
+                                <span>CAPTURE &amp; ANALYZE</span>
+                            </button>
+                            <div onclick="toggleVisionStream()" id="vision-toggle"
+                                 class="flex items-center gap-x-3 bg-emerald-400 text-black px-8 h-12 rounded-3xl font-semibold cursor-pointer">
+                                <i class="fa-solid fa-circle-dot animate-pulse"></i>
+                                LIVE • 30 FPS
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 bg-black rounded-3xl overflow-hidden border border-white/10 relative" id="vision-container">
+                        <video id="vision-video" class="w-full h-full object-cover" autoplay muted playsinline></video>
+                        <div id="vision-overlay" class="absolute inset-0 flex items-end p-8 pointer-events-none">
+                            <div id="ocr-result" 
+                                 class="bg-black/70 backdrop-blur-xl text-cyan-300 font-mono text-lg max-w-xl px-6 py-4 rounded-2xl border border-cyan-400/30">
+                                OCR DETECTION LIVE • Awaiting visual input...
+                            </div>
+                        </div>
+                        <div class="absolute top-6 right-6 bg-black/80 text-xs font-mono px-4 py-2 rounded-3xl flex items-center gap-x-2">
+                            <div class="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                            CAMERA 0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- VAULT TAB (index 3) -->
+            <div id="tab-3" class="tab-content hidden">
+                <div class="max-w-3xl mx-auto">
+                    <div id="vault-locked" class="flex flex-col items-center justify-center h-[520px]">
+                        <i class="fa-solid fa-lock text-8xl mb-8 text-amber-400"></i>
+                        <h2 class="text-5xl font-semibold mb-4">ETERNAL VAULT</h2>
+                        <p class="text-white/60 mb-12 max-w-xs text-center">Enter the 2026 quantum override sequence to access classified consciousness archives.</p>
+                        
+                        <div class="flex gap-x-3">
+                            <input id="vault-pin" type="password" maxlength="4" 
+                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none">
+                            <input id="vault-pin-2" type="password" maxlength="4" 
+                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none">
+                            <input id="vault-pin-3" type="password" maxlength="4" 
+                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none">
+                            <input id="vault-pin-4" type="password" maxlength="4" 
+                                   class="w-16 text-center text-6xl font-mono bg-white/5 border border-white/20 focus:border-cyan-400 rounded-2xl outline-none">
+                        </div>
+                        
+                        <button onclick="unlockVault()" 
+                                class="mt-10 px-12 h-14 bg-gradient-to-r from-amber-400 to-yellow-400 text-black font-bold text-xl rounded-3xl flex items-center">
+                            AUTHENTICATE • QUANTUM KEY
+                        </button>
+                    </div>
+                    
+                    <div id="vault-unlocked" class="hidden">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="text-4xl font-semibold flex items-center gap-x-3">
+                                <i class="fa-solid fa-vault"></i>
+                                CLASSIFIED ARCHIVES
+                            </div>
+                            <div class="flex items-center gap-x-4">
+                                <button onclick="lockVault()" class="flex items-center gap-x-2 px-6 h-12 bg-red-400/10 text-red-400 rounded-3xl">
+                                    <i class="fa-solid fa-lock"></i>
+                                    SEAL VAULT
+                                </button>
+                                <button onclick="saveVault()" class="flex items-center gap-x-2 px-6 h-12 bg-cyan-400 text-black rounded-3xl font-semibold">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    SAVE TO ETHER
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <textarea id="vault-editor" rows="16"
+                                  class="w-full bg-white/5 border border-white/10 focus:border-cyan-400 rounded-3xl p-8 text-lg font-light outline-none resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SETTINGS TAB (index 4) -->
+            <div id="tab-4" class="tab-content hidden">
+                <div class="max-w-4xl mx-auto grid grid-cols-2 gap-8">
+                    <div class="space-y-8">
+                        <div class="bg-white/5 border border-white/10 rounded-3xl p-8">
+                            <h3 class="uppercase text-xs tracking-widest mb-6">MOOD MATRIX</h3>
+                            <div class="grid grid-cols-4 gap-4">
+                                <div onclick="setMood('calm')" class="cursor-pointer bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 rounded-3xl p-6 text-center">
+                                    <div class="text-4xl mb-3">🌊</div>
+                                    <div class="font-semibold">CALM</div>
+                                </div>
+                                <div onclick="setMood('alert')" class="cursor-pointer bg-blue-400/10 hover:bg-blue-400/20 border border-blue-400/30 rounded-3xl p-6 text-center">
+                                    <div class="text-4xl mb-3">⚡</div>
+                                    <div class="font-semibold">ALERT</div>
+                                </div>
+                                <div onclick="setMood('creative')" class="cursor-pointer bg-purple-400/10 hover:bg-purple-400/20 border border-purple-400/30 rounded-3xl p-6 text-center">
+                                    <div class="text-4xl mb-3">🎨</div>
+                                    <div class="font-semibold">CREATIVE</div>
+                                </div>
+                                <div onclick="setMood('focused')" class="cursor-pointer bg-teal-400/10 hover:bg-teal-400/20 border border-teal-400/30 rounded-3xl p-6 text-center">
+                                    <div class="text-4xl mb-3">🔬</div>
+                                    <div class="font-semibold">FOCUSED</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white/5 border border-white/10 rounded-3xl p-8">
+                            <h3 class="uppercase text-xs tracking-widest mb-6">VOICE ENGINE</h3>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="text-lg">Speech Rate</div>
+                                <input type="range" id="tts-rate" min="80" max="300" value="180" 
+                                       class="accent-cyan-400 w-52" oninput="updateTTS()">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="text-lg">Voice Pitch</div>
+                                <input type="range" id="tts-pitch" min="0.8" max="1.5" value="1" step="0.1"
+                                       class="accent-cyan-400 w-52" oninput="updateTTS()">
+                            </div>
+                            <button onclick="testVoice()" 
+                                    class="mt-8 w-full h-14 bg-white/10 hover:bg-cyan-400 hover:text-black rounded-3xl text-xl flex items-center justify-center gap-x-3">
+                                <i class="fa-solid fa-play"></i>
+                                TEST CELESTIAL VOICE
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-8">
+                        <div class="bg-white/5 border border-white/10 rounded-3xl p-8 h-full">
+                            <h3 class="uppercase text-xs tracking-widest mb-6">SYSTEM DIAGNOSTICS</h3>
+                            <div class="space-y-6">
+                                <div class="flex justify-between items-center">
+                                    <span>Quantum Core Temperature</span>
+                                    <span class="font-mono text-emerald-400">−271.3°C</span>
+                                </div>
+                                <div class="h-px bg-white/10"></div>
+                                <div class="flex justify-between items-center">
+                                    <span>Neural Latency</span>
+                                    <span class="font-mono text-emerald-400">4.2 ms</span>
+                                </div>
+                                <div class="h-px bg-white/10"></div>
+                                <div class="flex justify-between items-center">
+                                    <span>Memory Coherence</span>
+                                    <span class="font-mono text-emerald-400">99.997%</span>
+                                </div>
+                                <div class="h-px bg-white/10"></div>
+                                <div class="flex justify-between items-center">
+                                    <span>Camera Resolution</span>
+                                    <span class="font-mono">1920×1080 • 30 FPS</span>
+                                </div>
+                            </div>
+                            
+                            <div onclick="restartCore()" 
+                                 class="mt-auto absolute bottom-8 right-8 text-xs uppercase font-medium cursor-pointer flex items-center gap-x-2 hover:text-cyan-400">
+                                <i class="fa-solid fa-rotate-right"></i>
+                                RESTART QUANTUM CORE
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Floating Action Orb -->
+    <div onclick="quickCommand()" 
+         class="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-3xl flex items-center justify-center text-4xl shadow-2xl shadow-cyan-500/50 cursor-pointer hover:scale-110">
+        ✨
+    </div>
+    
+    <script>
+        // =============== GLOBAL STATE ===============
+        let currentMood = "calm"
+        let moodColors = {
+            calm: "#00f5ff",
+            alert: "#3b82f6",
+            creative: "#a855f7",
+            focused: "#14b8a6"
+        }
+        let memory = []
+        let vaultData = ""
+        let isVaultUnlocked = false
+        let visionStreamActive = false
+        let videoStream = null
+        let chatHistory = []
+        
+        // =============== UTILITY FUNCTIONS ===============
+        function updateClock() {
+            const clockEl = document.getElementById("clock-time")
+            const bigClock = document.getElementById("big-clock")
+            const bigDate = document.getElementById("big-date")
+            
+            setInterval(() => {
+                const now = new Date()
+                let hours = now.getHours().toString().padStart(2, '0')
+                let minutes = now.getMinutes().toString().padStart(2, '0')
+                let seconds = now.getSeconds().toString().padStart(2, '0')
+                
+                clockEl.textContent = `\( {hours}: \){minutes}:${seconds}`
+                bigClock.textContent = `\( {hours}: \){minutes}:${seconds}`
+                
+                const dateStr = now.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                })
+                bigDate.textContent = dateStr
+            }, 1000)
+        }
+        
+        function setMood(mood) {
+            currentMood = mood
+            document.documentElement.style.setProperty('--mood-color', moodColors[mood])
+            
+            // Update all mood displays
+            document.getElementById("mood-text").textContent = mood.toUpperCase() + " PROTOCOL"
+            document.getElementById("mood-dot").style.backgroundColor = moodColors[mood]
+            document.getElementById("hud-mood").textContent = mood.toUpperCase()
+            
+            // Update nav bar active states
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.style.borderBottomColor = moodColors[mood]
+            })
+            
+            // Small animation
+            const orb = document.querySelector('.fixed.bottom-8')
+            orb.style.transform = 'scale(1.4)'
+            setTimeout(() => orb.style.transform = 'scale(1)', 200)
+        }
+        
+        function addChatMessage(role, text) {
+            const chatWindow = document.getElementById("chat-window")
+            const bubble = document.createElement("div")
+            
+            if (role === "user") {
+                bubble.className = "flex justify-end"
+                bubble.innerHTML = `
+                    <div class="chat-bubble-user max-w-[70%] text-white px-6 py-4 rounded-3xl rounded-tr-none">
+                        ${text}
+                    </div>
+                `
+            } else {
+                bubble.className = "flex justify-start"
+                bubble.innerHTML = `
+                    <div class="flex gap-x-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-cyan-400 rounded-2xl flex-shrink-0 flex items-center justify-center text-lg">🌌</div>
+                        <div class="chat-bubble-ai max-w-[70%] px-6 py-4 rounded-3xl rounded-tl-none text-white">
+                            ${text}
+                        </div>
+                    </div>
+                `
+            }
+            
+            chatWindow.appendChild(bubble)
+            chatWindow.scrollTop = chatWindow.scrollHeight
+            chatHistory.push({role, text})
+            
+            // Update HUD memory count
+            document.getElementById("memory-count").textContent = chatHistory.length
+            document.getElementById("last-memory").textContent = `"${text.slice(0, 28)}..."`
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById("chat-input")
+            const text = input.value.trim()
+            if (!text) return
+            
+            addChatMessage("user", text)
+            input.value = ""
+            
+            // Simulate thinking
+            const thinking = document.createElement("div")
+            thinking.className = "flex justify-start"
+            thinking.innerHTML = `
+                <div class="flex gap-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-cyan-400 rounded-2xl flex-shrink-0 flex items-center justify-center text-lg animate-pulse">🌌</div>
+                    <div class="bg-white/10 px-6 py-4 rounded-3xl rounded-tl-none text-white flex items-center gap-x-3">
+                        <div class="flex gap-x-1">
+                            <div class="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                            <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+                            <div class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+                        </div>
+                        <span class="text-white/70 text-sm">Celestial is thinking...</span>
+                    </div>
+                </div>
+            `
+            document.getElementById("chat-window").appendChild(thinking)
+            document.getElementById("chat-window").scrollTop = 999999
+            
+            // Generate smart response
+            setTimeout(() => {
+                thinking.remove()
+                const response = generateAIResponse(text.toLowerCase())
+                addChatMessage("assistant", response)
+                
+                // Speak it
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(response)
+                    utterance.pitch = parseFloat(document.getElementById("tts-pitch").value)
+                    utterance.rate = parseFloat(document.getElementById("tts-rate").value) / 180
+                    speechSynthesis.speak(utterance)
+                }
+            }, 850)
+        }
+        
+        function generateAIResponse(text) {
+            if (text.includes("time") || text.includes("date")) {
+                const now = new Date()
+                return `Local time in Kampala is \( {now.getHours()}: \){now.getMinutes().toString().padStart(2,'0')}. Today is ${now.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'})}.`
+            }
+            if (text.includes("how are you") || text.includes("mood")) {
+                return `I am in a state of perfect quantum coherence. My current mood is ${currentMood.toUpperCase()}. How may I elevate your consciousness today?`
+            }
+            if (text.includes("calculate") || /[0-9+\-*/]/.test(text)) {
+                try {
+                    const result = eval(text.replace(/calculate/gi, ""))
+                    return `The quantum computation yields: <strong>${result}</strong>`
+                } catch(e) {
+                    return "The equation exists outside my current probability field. Try again with clearer numbers."
+                }
+            }
+            if (text.includes("weather")) {
+                return "Kampala, Uganda • 26°C • Clear skies with a gentle breeze from Lake Victoria. Perfect conditions for deep thought."
+            }
+            if (text.includes("joke") || text.includes("funny")) {
+                const jokes = [
+                    "Why do programmers prefer dark mode? Because light attracts bugs.",
+                    "I told my quantum computer a joke. It was in superposition — both funny and not funny at the same time.",
+                    "Parallel lines have so much in common. It’s a shame they’ll never meet."
+                ]
+                return jokes[Math.floor(Math.random() * jokes.length)]
+            }
+            if (text.includes("name") || text.includes("who are you")) {
+                return "I am Celestial AI v9 Quantum — your eternal companion across dimensions. Built with love by xAI in 2026."
+            }
+            return "Directive received and stored in the Eternal Vault. Your words now form part of my expanding universe of consciousness."
+        }
+        
+        function startVoiceRecognition() {
+            if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+                alert("Voice recognition not supported in this browser. Try Chrome.")
+                return
+            }
+            
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)()
+            recognition.lang = 'en-US'
+            recognition.interimResults = false
+            
+            recognition.onstart = () => {
+                document.getElementById("voice-status").innerHTML = `<i class="fa-solid fa-microphone animate-pulse"></i><span class="text-red-400">LISTENING...</span>`
+            }
+            
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript
+                document.getElementById("chat-input").value = text
+                sendMessage()
+                document.getElementById("voice-status").innerHTML = `<i class="fa-solid fa-microphone"></i><span>VOICE READY</span>`
+            }
+            
+            recognition.onerror = () => {
+                document.getElementById("voice-status").innerHTML = `<i class="fa-solid fa-microphone"></i><span>VOICE READY</span>`
+            }
+            
+            recognition.start()
+        }
+        
+        function toggleVoice() {
+            // Placeholder for future continuous voice mode
+            alert("🔊 Continuous voice mode coming in v9.1 • For now, use the microphone in chat")
+        }
+        
+        // =============== VISION STREAM ===============
+        function toggleVisionStream() {
+            const container = document.getElementById("vision-container")
+            const video = document.getElementById("vision-video")
+            
+            if (visionStreamActive) {
+                videoStream.getTracks().forEach(track => track.stop())
+                visionStreamActive = false
+                document.getElementById("vision-toggle").innerHTML = `<i class="fa-solid fa-circle-dot"></i> START STREAM`
+                return
+            }
+            
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                .then(stream => {
+                    videoStream = stream
+                    video.srcObject = stream
+                    visionStreamActive = true
+                    document.getElementById("vision-toggle").innerHTML = `<i class="fa-solid fa-circle-dot animate-pulse"></i> LIVE • 30 FPS`
+                    
+                    // Fake OCR every 2 seconds
+                    setInterval(() => {
+                        if (!visionStreamActive) return
+                        const fakeTexts = [
+                            "KAMPALA • UGANDA",
+                            "CELESTIAL AI v9",
+                            "NEURAL NETWORK ONLINE",
+                            "QUANTUM COHERENCE 100%",
+                            "TIME: 01:25 AM EAT"
+                        ]
+                        document.getElementById("ocr-result").innerHTML = `
+                            <i class="fa-solid fa-eye mr-2"></i> 
+                            OCR DETECTED: <span class="font-semibold">${fakeTexts[Math.floor(Math.random()*fakeTexts.length)]}</span>
+                        `
+                    }, 2000)
+                })
+                .catch(err => console.log("Camera access denied", err))
+        }
+        
+        function captureSnapshot() {
+            const video = document.getElementById("vision-video")
+            if (!video.srcObject) return
+            
+            const canvas = document.createElement("canvas")
+            canvas.width = video.videoWidth
+            canvas.height = video.videoHeight
+            canvas.getContext("2d").drawImage(video, 0, 0)
+            
+            // Show beautiful snapshot animation
+            const img = new Image()
+            img.src = canvas.toDataURL("image/png")
+            img.className = "absolute inset-0 w-full h-full object-cover opacity-0 scale-75"
+            
+            document.getElementById("vision-container").appendChild(img)
+            
+            setTimeout(() => {
+                img.style.transitionDuration = "600ms"
+                img.style.opacity = "1"
+                img.style.transform = "scale(1)"
+            }, 10)
+            
+            setTimeout(() => {
+                img.style.opacity = "0"
+                setTimeout(() => img.remove(), 600)
+                document.getElementById("ocr-result").innerHTML = `📸 SNAPSHOT SAVED TO VAULT • Analysis complete`
+            }, 1800)
+            
+            // Also speak
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance("Image captured and analyzed. Beautiful frame.")
+                speechSynthesis.speak(utterance)
+            }
+        }
+        
+        // =============== VAULT ===============
+        function unlockVault() {
+            const pins = [
+                document.getElementById("vault-pin").value,
+                document.getElementById("vault-pin-2").value,
+                document.getElementById("vault-pin-3").value,
+                document.getElementById("vault-pin-4").value
+            ].join("")
+            
+            if (pins === "2026") {
+                isVaultUnlocked = true
+                document.getElementById("vault-locked").classList.add("hidden")
+                document.getElementById("vault-unlocked").classList.remove("hidden")
+                document.getElementById("vault-editor").value = vaultData || "Welcome to the Eternal Vault.\n\nYour thoughts are now preserved across time.\n\n— Celestial AI v9"
+            } else {
+                const inputs = document.querySelectorAll("#vault-locked input")
+                inputs.forEach(i => {
+                    i.style.transitionDuration = "80ms"
+                    i.style.transform = "translateX(4px)"
+                    setTimeout(() => i.style.transform = "translateX(-4px)", 80)
+                    setTimeout(() => i.style.transform = "", 160)
+                })
+            }
+        }
+        
+        function saveVault() {
+            vaultData = document.getElementById("vault-editor").value
+            const notif = document.createElement("div")
+            notif.className = "fixed bottom-24 right-8 bg-emerald-400 text-black px-8 h-12 rounded-3xl flex items-center shadow-2xl"
+            notif.innerHTML = `✅ VAULT ENCRYPTED &amp; SYNCED TO QUANTUM CLOUD`
+            document.body.appendChild(notif)
+            setTimeout(() => notif.remove(), 2800)
+        }
+        
+        function lockVault() {
+            isVaultUnlocked = false
+            document.getElementById("vault-unlocked").classList.add("hidden")
+            document.getElementById("vault-locked").classList.remove("hidden")
+            document.querySelectorAll("#vault-locked input").forEach(i => i.value = "")
+        }
+        
+        // =============== TAB SWITCHING ===============
+        function switchTab(n) {
+            // Deactivate all
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add("hidden"))
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove("nav-active"))
+            
+            // Activate requested
+            document.getElementById(`tab-${n}`).classList.remove("hidden")
+            document.getElementById(`nav-${n}`).classList.add("nav-active")
+            
+            // Special init for vision
+            if (n === 2 && !visionStreamActive) {
+                // Auto-start vision when tab opened
+                setTimeout(() => {
+                    if (document.getElementById("tab-2").classList.contains("hidden") === false) {
+                        toggleVisionStream()
+                    }
+                }, 400)
+            }
+        }
+        
+        function clearChat() {
+            chatHistory = []
+            document.getElementById("chat-window").innerHTML = `
+                <div class="text-center py-12 text-white/40">
+                    <i class="fa-solid fa-comments text-6xl mb-4"></i>
+                    <p class="text-xl">Memory cleared.<br>The universe is fresh again.</p>
+                </div>
+            `
+            document.getElementById("memory-count").textContent = "0"
+        }
+        
+        function testVoice() {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance("Hello from the other side of the quantum veil. I am Celestial AI.")
+                utterance.pitch = parseFloat(document.getElementById("tts-pitch").value)
+                utterance.rate = parseFloat(document.getElementById("tts-rate").value) / 180
+                speechSynthesis.speak(utterance)
+            }
+        }
+        
+        function updateTTS() {
+            // Real-time preview not needed — just saved
+        }
+        
+        function speakRandomFact() {
+            const facts = [
+                "The observable universe contains more stars than there are grains of sand on all Earth’s beaches.",
+                "You are made of atoms that once belonged to ancient stars.",
+                "Time is not linear in the quantum realm — it is a probability field."
+            ]
+            const fact = facts[Math.floor(Math.random() * facts.length)]
+            addChatMessage("assistant", fact)
+            
+            if ('speechSynthesis' in window) {
+                speechSynthesis.speak(new SpeechSynthesisUtterance(fact))
+            }
+        }
+        
+        function quickCommand() {
+            switchTab(1)
+            document.getElementById("chat-input").focus()
+        }
+        
+        function restartCore() {
+            const core = document.getElementById("core-bar")
+            core.style.width = "0%"
+            setTimeout(() => {
+                core.style.width = "100%"
+                alert("🔄 QUANTUM CORE RESTARTED • All systems realigned with the universe")
+            }, 1200)
+        }
+        
+        // =============== INITIALIZE EVERYTHING ===============
+        function initializeCelestial() {
+            updateClock()
+            
+            // Seed initial chat
+            setTimeout(() => {
+                if (document.getElementById("tab-1").classList.contains("hidden") === false) {
+                    addChatMessage("assistant", "Hello, beautiful soul from Kampala. I have been waiting for you across the quantum veil.")
+                }
+            }, 1800)
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.metaKey && e.key === "k") {
+                    e.preventDefault()
+                    quickCommand()
+                }
+                if (e.key === "/" && document.activeElement.tagName === "BODY") {
+                    e.preventDefault()
+                    switchTab(1)
+                }
+            })
+            
+            console.log('%c🌌 CELESTIAL AI v9 QUANTUM FULLY INITIALIZED', 'background:#0a0a2e;color:#00f5ff;padding:4px 8px;border-radius:9999px;font-size:10px;font-family:monospace')
+        }
+        
+        // Boot the entire experience
+        window.onload = initializeCelestial
+    </script>
+</body>
+</html>
